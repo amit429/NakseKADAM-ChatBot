@@ -53,17 +53,17 @@ const Home = () => {
   // }
 
 
-  const handleChange = (e) => {
-    if (e.target.value == "en-IN") {
-      handleEng();
-    }
-    else if (e.target.value == "hi-IN") {
-      handleHin();
-    }
-    else if (e.target.value == "mr-IN") {
-      handleMar();
-    }
-  }
+  // const handleChange = (e) => {
+  //   if (e.target.value == "en-IN") {
+  //     handleEng();
+  //   }
+  //   else if (e.target.value == "hi-IN") {
+  //     handleHin();
+  //   }
+  //   else if (e.target.value == "mr-IN") {
+  //     handleMar();
+  //   }
+  // }
 
       const [searchParams] = useSearchParams();
       const uid =  searchParams.get("uid");
