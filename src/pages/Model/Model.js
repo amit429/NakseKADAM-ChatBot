@@ -6,6 +6,16 @@ import Altresponse from "../../components/altresponse/Altresponse";
 import Select from 'react-select';
 import spinner from "../../assets/spinner.gif";
 import {Store} from "../../classes/storage";
+import { Button, useDisclosure } from "@chakra-ui/react";
+import logo from "../../assets/vidyabot.png";
+import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogOverlay,
+} from '@chakra-ui/react'
 
 const SpeechRecognition =
   window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -95,14 +105,17 @@ function Model() {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
       },
-      body: JSON.stringify({ query: text }),
+      body: JSON.stringify({ query: text, uid: Store.uid}),
     };
     setLoading(true);
     const response = await fetch("/query", requestoptions);
-    const data = await response.json();
+    const fulldata = await response.json();
+    const data = fulldata.result;
+    const sentiment = fulldata.sentiment;
     console.log(data);
+    console.log(sentiment);
     setpopupData(data.documents)
-    setAnswer(data.documents[0].question);
+    setAnswer(data.documents[0].question);detectSentiment(sentiment)
     setLoading(false)
     if (mic.lang === "en-IN") { setMeta(data.documents[0].answer); }
     else if (mic.lang === "hi-IN") { setMeta(data.documents[0].answer_hi); }
@@ -115,12 +128,19 @@ function Model() {
     // }, 120000);
   };
 
+  const detectSentiment =(sentiment)=>{
+    if(sentiment === "negative"){
+      console.log("negative")
+      onOpen();
+    }
+  }
+
   const handleSaveText = (e) => {
     setSavedTexts([...savedTexts, text]);
     api_response();
     setText(e.target.value);
     console.log(text);
-    savedTexts.clear();
+    //savedTexts.clear();
   };
 
   const handleChange = (selectedOption) => {
@@ -165,19 +185,57 @@ function Model() {
     { label: "English", value: "en-IN" },
     { label: "Hindi", value: "hi-IN" },
     { label: "Marathi", value: "mr-IN" },
-    { label: "Kanada", value: "ka-IN" },
+    { label: "Kannada", value: "ka-IN" },
     { label: "Tamil", value: "ta-IN" },
   ];
 
   console.log(" Me " + Store.uid);
   console.log(" Me " + Store.languageCode);
 
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  const cancelRef = React.useRef()
+
   return (
     <div className="Model">
       {/* <Particle></Particle> */}
       <div className="container">
         <div className="container-2">
-          <h1 className="heading">VIDYA BOT</h1>
+           <img src={logo} alt="Vidya Bot" style={{
+            width: "50%",
+            marginLeft: "25%",
+            paddingTop: "50px",
+           }}/>
+          <AlertDialog
+        isOpen={isOpen}
+        leastDestructiveRef={cancelRef}
+        onClose={onClose}
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize='lg' fontWeight='bold'>
+            Sentiment Analysis
+            </AlertDialogHeader>
+                  
+            <AlertDialogBody>
+                Oh no, we sense a tension in your feelings. 
+                We at NaksheKADAM are here to address all your career and life based grievances. 
+                Would you like to speak with a professional counsellor who can guide you better?
+            </AlertDialogBody>
+
+            <AlertDialogFooter>
+              <Button ref={cancelRef} onClick={onClose}>
+                Cancel
+              </Button>
+              <Button  onClick={onClose} ml={3} style={{
+                backgroundColor: "#8A2BE2",
+                color: "white",
+              }}>
+                  Chat With a Counselor
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
           <div className="box">
             <div className="instr">
               <h2>Instructions</h2>
@@ -227,6 +285,9 @@ function Model() {
               Alt
             </button>
             <button onClick={navtu}>Finish</button>
+            {/* <Button colorScheme='red' onClick={onOpen}>
+               Delete Customer
+            </Button> */}
           </div>
         </div>
       </div>
